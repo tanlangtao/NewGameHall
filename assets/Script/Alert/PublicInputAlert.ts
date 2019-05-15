@@ -33,7 +33,7 @@ export default class NewClass extends cc.Component {
 
     deleteClick(){
         this.input.string = '';
-        this.node.removeFromParent()
+        this.node.removeFromParent();
     }
 
     readyClick(){

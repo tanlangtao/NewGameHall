@@ -1146,7 +1146,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 100,
+      "width": 0,
       "height": 40
     },
     "_anchorPoint": {
@@ -1189,8 +1189,8 @@
     },
     "_enabled": true,
     "_useOriginalSize": false,
-    "_string": "充值范围：",
-    "_N$string": "充值范围：",
+    "_string": "",
+    "_N$string": "",
     "_fontSize": 20,
     "_lineHeight": 40,
     "_enableWrapText": true,
@@ -3280,6 +3280,9 @@
     },
     "RecoveryGold": {
       "__uuid__": "c1eff934-7a77-44f9-8c25-caa3f5eec5b2"
+    },
+    "service": {
+      "__uuid__": "315c4863-313d-4c04-9ea5-b6abf20b1121"
     },
     "amountLabel": {
       "__id__": 6

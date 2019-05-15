@@ -34,10 +34,13 @@
       },
       {
         "__id__": 13
+      },
+      {
+        "__id__": 14
       }
     ],
     "_prefab": {
-      "__id__": 14
+      "__id__": 15
     },
     "_opacity": 255,
     "_color": {
@@ -59,7 +62,7 @@
     },
     "_position": {
       "__type__": "cc.Vec3",
-      "x": 127.9,
+      "x": 128,
       "y": 200,
       "z": 0
     },
@@ -497,6 +500,33 @@
     "ZfbToBank": {
       "__uuid__": "e6bdff22-dd3d-4227-9887-d60d082ff95e"
     },
+    "_id": ""
+  },
+  {
+    "__type__": "cc.Widget",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 1
+    },
+    "_enabled": true,
+    "alignMode": 1,
+    "_target": null,
+    "_alignFlags": 0,
+    "_left": 0,
+    "_right": 880,
+    "_top": 390,
+    "_bottom": 150,
+    "_verticalCenter": 0,
+    "_horizontalCenter": 0,
+    "_isAbsLeft": true,
+    "_isAbsRight": true,
+    "_isAbsTop": true,
+    "_isAbsBottom": true,
+    "_isAbsHorizontalCenter": true,
+    "_isAbsVerticalCenter": true,
+    "_originalWidth": 256,
+    "_originalHeight": 100,
     "_id": ""
   },
   {

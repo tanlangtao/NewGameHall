@@ -26,7 +26,7 @@ export default class NewClass extends cc.Component {
     }
 
     onClick(){
-        this.node.removeFromParent()
+        this.node.destroy()
     }
     // update (dt) {}
 }

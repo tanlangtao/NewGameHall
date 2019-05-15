@@ -2123,7 +2123,9 @@
     "card_nameLabel": null,
     "card_numLabel": null,
     "nickNameLabel": null,
+    "remarkLabel": null,
     "publicAlert": null,
+    "fuzhiBtn4": null,
     "results": {},
     "_id": ""
   },

@@ -42,6 +42,9 @@ export default class NewClass extends cc.Component {
     @property()
     FormData = new FormData();
 
+    @property
+    //main组件
+    public app :any = {};
     // LIFE-CYCLE CALLBACKS:
 
     onLoad() {
@@ -49,16 +52,10 @@ export default class NewClass extends cc.Component {
         this.UrlData = config.getUrlData();
         this.token = config.token;
         //初始请求
-        this.fetchIndex()
+        this.fetchIndex();
         // input 输入监听
         this.getPublicInput()
-
     }
-
-    start() {
-
-    }
-
     public fetchIndex() {
         var url = `${this.UrlData.host}/api/replace_payment/index?user_id=${this.UrlData.user_id}&token=${this.token}`;
         fetch(url, {
@@ -67,7 +64,7 @@ export default class NewClass extends cc.Component {
             if (data.status == 0) {
                 this.results = data;
             } else {
-
+                this.showAlert(data.msg)
             }
         })
     }
@@ -108,6 +105,7 @@ export default class NewClass extends cc.Component {
             body: this.FormData
         }).then((data) => data.json()).then((data) => {
             if (data.status == 0) {
+                this.showAlert('申请成功！')
                 var node = cc.instantiate(this.service);
                 var content = cc.find('Canvas/Recharge/Content');
                 content.addChild(node);
@@ -156,7 +154,9 @@ export default class NewClass extends cc.Component {
     btn2Click() {
         let node = cc.instantiate(this.SaleGold);
         var content = cc.find('Canvas/Recharge/Content');
+        content.removeAllChildren();
         content.addChild(node);
+
     }
 
     // update (dt) {}

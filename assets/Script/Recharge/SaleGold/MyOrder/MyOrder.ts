@@ -25,6 +25,9 @@ export default class NewClass extends cc.Component {
     @property(cc.EditBox)
     IdInput: cc.EditBox = null;
 
+    @property(cc.Prefab)
+    Dc: cc.Prefab = null;
+
     @property(cc.Label)
     selectLabel: cc.Label = null;
 
@@ -33,6 +36,9 @@ export default class NewClass extends cc.Component {
 
     @property(cc.Prefab)
     SelectItem: cc.Prefab = null;
+
+    @property(cc.Prefab)
+    MyOrderItem: cc.Prefab = null;
 
     @property(cc.Node)
     selectContent: cc.Node = null;
@@ -50,7 +56,7 @@ export default class NewClass extends cc.Component {
     public data: any = {};
     public FormData = new FormData();
     public page = 1;
-
+    public isReceive = false;
     // LIFE-CYCLE CALLBACKS:
 
     onLoad() {
@@ -90,20 +96,38 @@ export default class NewClass extends cc.Component {
     }
 
     public fetchIndex() {
-        this.pageLabel.string = `${this.page} / 10`;
-        var url = `${this.UrlData.host}/api/order/orderList?replace_id=${this.UrlData.user_id}&user_id=${this.IdInput.string}&order_status=${this.current}&token=${this.token}`;
+        var url = `${this.UrlData.host}/api/sell_gold/mySellGoldOrderList?user_id=${this.UrlData.user_id}&pay_id=${this.IdInput.string == "" ? 0:this.IdInput.string}&order_status=${this.current == 2 ?'6' :this.current}&token=${this.token}&page_set=5`;
         fetch(url, {
             method: 'get'
         }).then((data) => data.json()).then((data) => {
+            this.MyOrderList.removeAllChildren();
             if (data.status == 0) {
                 this.results = data;
-                cc.log(data);
+                this.init();
             } else {
-
+                this.showAlert(data.msg)
             }
+            //收到结果后才能点击搜索，上下翻页，避免页面错乱
+            this.isReceive = true;
         })
     }
 
+    init(){
+        this.pageLabel.string = `${this.page} / ${this.results.data.total_page == 0 ? '1' : this.results.data.total_page}`;
+        for(let i = 0 ; i< this.results.data.list.length ; i++) {
+            var data = this.results.data.list[i];
+            let node = cc.instantiate(this.MyOrderItem);
+            this.MyOrderList.addChild(node);
+            node.getComponent('MyOrderItem').init({
+                order_id: data.order_id,
+                user_id: data.user_id,
+                status: data.status,
+                amount: data.amount,
+                created_at: data.created_at,
+                results: data
+            })
+        }
+    }
 
     //selectItem回调
     public initRender() {
@@ -138,18 +162,15 @@ export default class NewClass extends cc.Component {
     }
 
     saleGoldClick() {
-        this.node.removeFromParent();
-        let node = cc.instantiate(this.SaleGold);
-        let content = cc.find('Canvas/Recharge/Content');
-        content.addChild(node);
+        if(this.isReceive){
+            this.node.destroy();
+            let node = cc.instantiate(this.SaleGold);
+            let content = cc.find('Canvas/Recharge/Content');
+            content.addChild(node);
+            this.isReceive = false;
+        }
 
     }
-
-    updataList(){
-        this.MyOrderList.removeAllChildren();
-        this.fetchIndex();
-    }
-
     deleteId(){
         this.IdInput.string = '';
     }
@@ -157,23 +178,31 @@ export default class NewClass extends cc.Component {
     pageUp(){
         if(this.page > 1){
             this.page = this.page - 1;
-            this.updataList();
+            this.fetchIndex();
+            this.isReceive = false;
         }
     }
 
     pageDown(){
-        if(this.page < 10){
+        if(this.page < this.results.data.total_page){
             this.page = this.page + 1;
-            this.updataList();
+            this.fetchIndex();
+            this.isReceive = false;
         }
     }
 
     removeSelf() {
-        this.node.removeFromParent();
+        this.node.destroy();
+        let node = cc.instantiate(this.Dc);
+        let content = cc.find('Canvas/Recharge/Content');
+        content.addChild(node);
     }
 
     onClick() {
-
+        if(this.isReceive){
+            this.fetchIndex();
+            this.isReceive = false;
+        }
     }
 
     // update (dt) {}

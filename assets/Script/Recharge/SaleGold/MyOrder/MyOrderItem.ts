@@ -14,10 +14,10 @@ const {ccclass, property} = cc._decorator;
 export default class NewClass extends cc.Component {
 
     @property(cc.Label)
-    OrderLabel: cc.Label = null;
+    order_idLabel: cc.Label = null;
 
     @property(cc.Label)
-    IdLabel: cc.Label = null;
+    user_idLabel: cc.Label = null;
 
     @property(cc.Label)
     statusLabel: cc.Label = null;
@@ -26,28 +26,50 @@ export default class NewClass extends cc.Component {
     amountLabel: cc.Label = null;
 
     @property(cc.Label)
-    firstTimeLabel: cc.Label = null;
+    created_atLabel: cc.Label = null;
+
+    @property(cc.Node)
+    querenBtn: cc.Node = null;
+
+    @property(cc.Prefab)
+    querenAlert: cc.Prefab = null;
 
     @property
-    public results = {};
+    public results = null;
     public config = null;
+    public UrlData = null;
+    public token = null;
+    public FormData = new FormData();
 
     onLoad () {
         this.config = new Config();
+        this.UrlData = this.config.getUrlData();
+        this.token = this.config.token;
     }
 
     public init(data){
-        this.statusLabel.string = data.status ==1 ?'已完成' :(data.status == 3 ? '已撤销' : '未完成' );
+        this.order_idLabel.string = data.order_id.substr(-6);
+        this.user_idLabel.string = data.user_id;
+        this.statusLabel.string = data.status == 6 ? "已完成":(data.status == 3 ?'未完成':(data.status == 5 ?'已付款':'交易失败'));
         this.amountLabel.string = this.config.toDecimal(data.amount);
-        this.firstTimeLabel.string = this.config.getTime(data.firstTime);
+        this.created_atLabel.string = this.config.getTime(data.created_at);
         this.results = data.results;
+        if(data.status != 5){
+            this.querenBtn.active = false;
+        }
     }
 
     start () {
 
     }
 
+
+
     onClick(){
+        let node = cc.instantiate(this.querenAlert);
+        var canvas = cc.find('Canvas');
+        canvas.addChild(node);
+        node.getComponent('CompleteOrderAlert').init(this.results)
     }
     // update (dt) {}
 }

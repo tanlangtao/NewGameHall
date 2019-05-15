@@ -16,6 +16,9 @@ const {ccclass, property} = cc._decorator;
 export default class NewClass extends cc.Component {
 
     @property(cc.Prefab)
+    publicAlert: cc.Prefab = null;
+
+    @property(cc.Prefab)
     Recharge: cc.Prefab = null;
 
     @property(cc.Prefab)
@@ -23,13 +26,15 @@ export default class NewClass extends cc.Component {
 
     @property()
     public UrlData : any = [];
+    public Client  = null;
     // LIFE-CYCLE CALLBACKS:
 
     onLoad () {
         var config = new Config();
         this.UrlData =config.getUrlData();
+        this.Client = new ClientMessage();
         //根据path来决定渲染充值或兑换
-        if(this.UrlData.path == '/Cash'){
+        if(this.UrlData.path == '/cash'){
             var node = cc.instantiate(this.Cash);
             var canvas = cc.find('Canvas');
             canvas.addChild(node);
@@ -38,8 +43,13 @@ export default class NewClass extends cc.Component {
             var canvas = cc.find('Canvas');
             canvas.addChild(node);
         }
+
+
     }
-    start () {
+    public showAlert(data){
+        var node = cc.instantiate(this.publicAlert);
+        var canvas = cc.find('Canvas');
+        canvas.addChild(node);
+        node.getComponent('PublicAlert').init(data)
     }
-    // update (dt) {}
 }

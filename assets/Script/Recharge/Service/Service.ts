@@ -46,7 +46,7 @@ export default class NewClass extends cc.Component {
     }
 
     fanhuiClick(){
-        this.node.removeFromParent();
+        this.node.destroy();
         this.parentComponent.fetchIndex()
     }
     // update (dt) {}

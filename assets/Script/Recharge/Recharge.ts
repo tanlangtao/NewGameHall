@@ -1,4 +1,5 @@
 import Config from "../Config";
+import ClientMessage from "../ClientMessage";
 
 // Learn TypeScript:
 //  - [Chinese] https://docs.cocos.com/creator/manual/zh/scripting/typescript.html
@@ -32,7 +33,9 @@ export default class NewClass extends cc.Component {
     public token: string = '';
     public results: any = {};
     public zfbResults: any = {};
-
+    public app : any = {};
+    //请求次数
+    public idx  = 0;
     // LIFE-CYCLE CALLBACKS:
 
 
@@ -46,12 +49,13 @@ export default class NewClass extends cc.Component {
     }
 
     start() {
+        this.app = cc.find('Canvas/Main').getComponent('Main');
 
-
+        this.app.Client.send('__done',{},()=>{})
     }
 
     public exitBtnClick() {
-
+       this.app.Client.send('__backtohall',{},()=>{})
     }
 
     public historyBtnClick() {
@@ -61,6 +65,7 @@ export default class NewClass extends cc.Component {
     }
 
     public fetchZfb() {
+        this.idx  = this.idx +1 ;
         var url = `${this.UrlData.host}/api/payment/aliPayPaymentIndex?user_id=${this.UrlData.user_id}&token=${this.token}`;
         fetch(url, {
             method: 'get'
@@ -69,23 +74,35 @@ export default class NewClass extends cc.Component {
                 this.zfbResults = data;
                 //动态渲染左侧导航
                 this.addNavToggle()
-            } else {
 
+            }else{
+                this.app.showAlert(data.msg)
             }
-        })
+        }).catch((error)=>{
+            console.log(error)
+            if(this.idx>=5){
+                this.app.showAlert(' 网络错误，请重试！');
+                let self = this;
+                //3秒后自动返回大厅
+                setTimeout(()=>{self.app.Client.send('__backtohall',{},()=>{})},2000)
+            }else{
+                //重新请求数据
+                this.fetchZfb();
+            }
+        });
         let total = ''
     }
 
     public addNavToggle() {
         var arr = [];
-        if (this.zfbResults.data.alipay.length == 0 && this.zfbResults.data.alipay2bank.length == 0) {
+        if (this.zfbResults.data.alipay.length == 0 && this.zfbResults.data.bankcard_transfer.length == 0) {
             arr = ['人工代充值']
         } else if (this.zfbResults.data.alipay.length == 0) {
-            arr = ['人工代充值', '支付宝转银行卡']
-        } else if (this.zfbResults.data.alipay2bank.length == 0) {
+            arr = ['人工代充值', '银行卡转账']
+        } else if (this.zfbResults.data.bankcard_transfer.length == 0) {
             arr = ['人工代充值', '支付宝']
         } else {
-            arr = ['人工代充值', '支付宝', '支付宝转银行卡']
+            arr = ['人工代充值', '支付宝', '银行卡转账']
         }
         for (let i: number = 0; i < arr.length; i++) {
             var node = cc.instantiate(this.NavToggle);

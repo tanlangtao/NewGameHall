@@ -7,113 +7,114 @@
 // Learn life-cycle callbacks:
 //  - [Chinese] https://docs.cocos.com/creator/manual/zh/scripting/life-cycle-callbacks.html
 //  - [English] http://www.cocos2d-x.org/docs/creator/manual/en/scripting/life-cycle-callbacks.html
-import Config from "../../../Config"
+import Config from "../../../Config";
+
 const {ccclass, property} = cc._decorator;
 
 @ccclass
 export default class NewClass extends cc.Component {
+    @property(cc.Prefab)
+    publicAlert: cc.Prefab = null;
 
     @property(cc.Prefab)
-    NavToggle : cc.Prefab = null;
-
-    @property(cc.Node)
-    ToggleContainer : cc.Node = null;
+    SaleGold: cc.Prefab = null;
 
     @property(cc.Prefab)
-    ListItem : cc.Prefab = null;
-
-    @property(cc.Node)
-    List : cc.Node = null;
+    SaleItem: cc.Prefab = null;
 
     @property(cc.Label)
-    pageLabel : cc.Label = null;
+    pageLabel: cc.Label = null;
 
-    @property()
-    public UrlData : any = [];
-    public token = '';
-    public results : any = {};
-    public order_status = 0;
+    @property(cc.Node)
+    saleGoldList: cc.Node = null;
+
+    @property
+    public results = null;
+    public config = null;
+    public UrlData: any = [];
+    public token: string = '';
+    public FormData = new FormData();
     public page = 1;
+
     // LIFE-CYCLE CALLBACKS:
 
-    onLoad () {
-        var config = new Config();
-        this.UrlData =config.getUrlData();
-        this.token = config.token;
+    onLoad() {
+        this.config = new Config();
+        this.UrlData = this.config.getUrlData();
+        this.token = this.config.token;
 
-        this.addNavToggle()
-
-        this.updataList()
-    }
-
-    start () {
-
-    }
-
-    updataList(){
-        this.List.removeAllChildren();
         this.fetchIndex();
     }
 
-    public fetchIndex(){
-        var url = `${this.UrlData.host}/api/sell_gold/sellGoldHistory?user_id=${this.UrlData.user_id}&token=${this.token}&page=${this.page}&page_set=8`;
-        fetch(url,{
-            method:'get'
-        }).then((data)=>data.json()).then((data)=>{
-            if(data.status == 0){
-                this.results = data;
-                cc.log(data)
-                this.pageLabel.string = `${this.page} / ${data.data.total_page == 0 ? '1' : data.data.total_page}`;
-                var listArr = data.data.list;
-                for(var i = 0; i < listArr.length; i++){
-                    var data = listArr[i];
-                    var node = cc.instantiate(this.ListItem);
-                    this.List.addChild(node);
-                    node.getComponent('SaleGoldHistoryItem').init({
-                        created_at : data.created_at,
-                        gold : data.gold,
-                        down_at : data.down_at,
-                        last_gold : data.last_gold,
-                        traded_gold : data.traded_gold,
-                        status : data.status,
-                        results:data
-                    })
-                }
-            }else{
+    start() {
 
+    }
+
+
+    public fetchIndex() {
+
+        var url = `${this.UrlData.host}/api/sell_gold/sellGoldHistory?&user_id=${this.UrlData.user_id}&page=${this.page}&page_set=8&token=${this.token}`;
+        fetch(url, {
+            method: 'get'
+        }).then((data) => data.json()).then((data) => {
+            this.saleGoldList.removeAllChildren();
+            if (data.status == 0) {
+                this.results = data;
+                this.init();
+            } else {
+                this.showAlert(data.msg);
             }
         })
     }
 
-    public addNavToggle(){
-        var arr = ['全部'];
-        for(let i:number = 0; i< arr.length; i++){
-            var node = cc.instantiate(this.NavToggle);
-            this.ToggleContainer.addChild(node);
-            node.getComponent('SaleGoldHistoryToggle').init({
-                text : arr[i],
-                index : i,
-                parentComponet:this
+    public  init(){
+        this.pageLabel.string = `${this.page} / ${Number(this.results.data.total_page) == 0 ? '1' : this.results.data.total_page}`;
+        for(let i = 0 ;i<this.results.data.list.length; i++){
+            var node = cc.instantiate(this.SaleItem);
+            this.saleGoldList.addChild(node);
+            var data = this.results.data.list[i];
+            node.getComponent('SaleItem').init({
+                created_at : data.created_at,
+                gold : data.gold,
+                down_at : data.down_at,
+                last_gold : data.last_gold,
+                consume_gold : data.traded_gold,
+                status : data.status
             })
         }
     }
-
-    removeSelf(){
-        this.node.removeFromParent();
+    public showAlert(data) {
+        var node = cc.instantiate(this.publicAlert);
+        var canvas = cc.find('Canvas');
+        canvas.addChild(node);
+        node.getComponent('PublicAlert').init(data);
     }
 
     pageUp(){
         if(this.page > 1){
             this.page = this.page - 1;
-            this.updataList()
+            this.fetchIndex();
         }
     }
 
     pageDown(){
-        if(this.page < this.results.data.total_page ){
+        let totalPage = Number(this.results.data.total_page);
+        if(this.page < totalPage){
             this.page = this.page + 1;
-            this.updataList()
+            this.fetchIndex();
         }
     }
+
+    removeSelf() {
+        this.node.destroy();
+        var node = cc.instantiate(this.SaleGold);
+        var content = cc.find('Canvas/Recharge/Content');
+        content.addChild(node);
+    }
+
+    onClick() {
+
+    }
+
     // update (dt) {}
 }

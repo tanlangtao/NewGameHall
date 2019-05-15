@@ -27,7 +27,7 @@ export default class NewClass extends cc.Component {
         this.UrlData = config.getUrlData();
         this.token = config.token;
         this.data = data;
-        this.label.string = `您有一笔代充订单未完成，金额${config.toDecimal(data.payment_amount)}，是否立即取消？`
+        this.label.string = `您有一笔代充订单未完成，金额${config.toDecimal(data.payment_amount)}，是否立即取消？`;
     }
     // LIFE-CYCLE CALLBACKS:
 
@@ -39,7 +39,7 @@ export default class NewClass extends cc.Component {
 
     onClick(){
         this.fetchReplacePayment();
-        this.node.removeFromParent();
+        this.node.destroy();
     }
 
     fetchReplacePayment(){
@@ -63,7 +63,7 @@ export default class NewClass extends cc.Component {
     }
 
     removeSelf(){
-        this.node.removeFromParent();
+        this.node.destroy();
     }
     // update (dt) {}
 }

@@ -20,6 +20,9 @@ export default class NewClass extends cc.Component {
     Dh : cc.Prefab = null;
 
     @property(cc.Prefab)
+    BankDh : cc.Prefab = null;
+
+    @property(cc.Prefab)
     RgDh : cc.Prefab = null;
 
     @property(cc.Prefab)
@@ -42,8 +45,10 @@ export default class NewClass extends cc.Component {
         var content = cc.find('Canvas/Cash/Content');
         if(this.label.string == '人工兑换'){
             var node = cc.instantiate(this.RgDh);
-        }else if(this.label.string == '兑换'){
+        }else if(this.label.string == '支付宝兑换'){
             var node = cc.instantiate(this.Dh);
+        }else if(this.label.string == '银行卡兑换'){
+            var node = cc.instantiate(this.BankDh);
         }else if(this.label.string == '赠送'){
             var node = cc.instantiate(this.Give);
         }

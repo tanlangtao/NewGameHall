@@ -36,17 +36,17 @@ export default class NewClass extends cc.Component {
     }
 
     onClick(){
-        if(this.index == 0){
-            this.parentComponet.order_status = 0;
-        }else if(this.index == 1){
-            this.parentComponet.order_status = 2;
-        }else if(this.index == 2){
-            this.parentComponet.order_status = 1;
-        }else if(this.index == 3){
-            this.parentComponet.order_status = 4;
-        }
-        this.parentComponet.page = 1;
-        this.parentComponet.updataList();
+            if(this.index == 0){
+                this.parentComponet.order_status = 0;
+            }else if(this.index == 1){
+                this.parentComponet.order_status = 6;
+            }else if(this.index == 2){
+                this.parentComponet.order_status = 1;
+            }else if(this.index == 3){
+                this.parentComponet.order_status = 4;
+            }
+            this.parentComponet.page = 1;
+            this.parentComponet.fetchIndex();
     }
     // update (dt) {}
 }

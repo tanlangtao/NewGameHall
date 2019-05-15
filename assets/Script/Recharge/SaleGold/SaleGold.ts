@@ -31,6 +31,9 @@ export default class NewClass extends cc.Component {
     @property(cc.Prefab)
     MyOrder: cc.Prefab = null;
 
+    @property(cc.Prefab)
+    Dc: cc.Prefab = null;
+
     @property(cc.Label)
     statusLabel: cc.Label = null;
 
@@ -59,6 +62,9 @@ export default class NewClass extends cc.Component {
     @property(cc.Label)
     selectLabel: cc.Label = null;
 
+    @property(cc.Label)
+    applayBtnLabel:cc.Label = null;
+
     @property(cc.Prefab)
     SelectItem: cc.Prefab = null;
 
@@ -73,6 +79,9 @@ export default class NewClass extends cc.Component {
 
     @property(cc.Node)
     applayBtn: cc.Node = null;
+
+    @property(cc.Node)
+    titleBg: cc.Node = null;
 
     @property
     showSelect = false;
@@ -131,16 +140,17 @@ export default class NewClass extends cc.Component {
         }).then((data) => data.json()).then((data) => {
             if (data.status == 0) {
                 this.results = data;
-                cc.log(data);
                 this.init();
             } else {
-
+                this.showAlert(data.msg);
             }
+        }).catch((error)=>{
+            this.showAlert(`错误${error}`)
         })
     }
 
     init() {
-
+         this.applayBtnLabel.string = '申请上架';
         let data = this.results.data;
 
         //is_apply为1,表示提交过卖分
@@ -150,35 +160,36 @@ export default class NewClass extends cc.Component {
             let status = data.user_info.status;
             //根据status判断界面显示
             this.statusLabel.string = status == 1 || status == 2 ? "审核中" :(status == 4 ? '挂单中':'' );
-            if(status == 1|| status == 2){
-                this.saleGoldLabel.string = this.config.toDecimal(data.user_info.now_up_gold);
+            if(status == 1|| status == 2 || status == 4){
+                //根据状态决定是否显示头部文字
+                this.titleBg.opacity = 255;
+
+                this.saleGoldLabel.string = this.config.toDecimal(data.user_info.now_up_last_gold);
                 //禁用input输入
                 this.amountInput.node.active = false;
                 this.ContactInput.node.active = false;
-                //设置出售金币额度的值
+                //出售金币额度
                 this.amountLabel.string = this.config.toDecimal(data.user_info.now_up_gold);
                 this.current = Number(data.user_info.contact_type)-1;
                 this.selectLabel.string = this.data[this.current];
                 this.contactLabel.string = data.user_info.contact_info;
                 //status == 4,审核通过
-            }else if(status == 4){
-                this.saleGoldLabel.string = this.config.toDecimal(data.user_info.now_up_last_gold);
-                //禁用input输入
-                this.amountInput.node.active = false;
-                this.ContactInput.node.active = false;
-                //设置出售金币额度的值
-                this.amountLabel.string = this.config.toDecimal(data.user_info.now_up_gold);
-                this.current = Number(data.user_info.contact_type)-1;
-                this.selectLabel.string = this.data[this.current];
-                this.contactLabel.string = data.user_info.contact_info;
-
-                this.applayBtn.children[0].getComponent(cc.Label).string = '撤销上架';
+                if(status == 4){
+                    this.applayBtnLabel.string = '撤销上架';
+                }
             }else{
+                //根据状态决定是否显示头部文字
+                this.titleBg.opacity = 0;
+
                 this.saleGoldLabel.string = this.config.toDecimal(data.user_info.now_up_last_gold);
                 this.amountInput.node.active = true;
                 this.ContactInput.node.active = true;
+                //非上架或等待上架，销售金额为0
+                this.saleGoldLabel.string = '0';
                 this.amountLabel.string = '';
                 this.contactLabel.string = '';
+                this.current = Number(data.user_info.contact_type)-1;
+                this.ContactInput.string = data.user_info.contact_info;
             }
 
         }
@@ -187,8 +198,7 @@ export default class NewClass extends cc.Component {
         //密码是否已设置显示
         this.passwordLabel.string = data.is_password == 0 ? '未设置' : '已设置';
         //设置密码按钮是否启用
-        this.btn1.getComponent(cc.Button).interactable = data.is_password == 0 ? true :false;
-        console.log(data.is_password == 0)
+        this.btn1.active = data.is_password == 0 ? true :false;
         // 出售范围
         this.czArea.string = `出售范围(${data.min_amount}-${data.max_amount})`;
     }
@@ -258,7 +268,7 @@ export default class NewClass extends cc.Component {
     }
 
     //验证密码回调type=4
-    public fetchSell_gold(pay_password) {
+    public fetchSell_gold() {
         var url = `${this.UrlData.host}/api/sell_gold/submitSellGoldInfo`;
         this.FormData = new FormData();
         this.FormData.append('user_id', this.UrlData.user_id);
@@ -277,7 +287,8 @@ export default class NewClass extends cc.Component {
             body: this.FormData
         }).then((data) => data.json()).then((data) => {
             if (data.status == 0) {
-                this.showAlert('申请成功！')
+                this.showAlert('申请成功！');
+                this.initRender();
             } else {
                 this.showAlert(data.msg)
             }
@@ -313,15 +324,20 @@ export default class NewClass extends cc.Component {
     }
 
     myOrderClick() {
-        this.node.removeFromParent();
-        let node = cc.instantiate(this.MyOrder);
-        let content = cc.find('Canvas/Recharge/Content');
-        content.addChild(node);
+        if(this.results!= null) {
+            this.node.destroy();
+            let node = cc.instantiate(this.MyOrder);
+            let content = cc.find('Canvas/Recharge/Content');
+            content.addChild(node);
+        }
 
     }
 
     removeSelf() {
-        this.node.removeFromParent();
+        this.node.destroy();
+        let node = cc.instantiate(this.Dc);
+        let content = cc.find('Canvas/Recharge/Content');
+        content.addChild(node);
     }
 
     setPassword() {
@@ -335,20 +351,23 @@ export default class NewClass extends cc.Component {
 
     historyClick() {
         let node = cc.instantiate(this.SaleGoldHistory);
-        let canvas = cc.find('Canvas');
-        canvas.addChild(node);
+        let content = cc.find('Canvas/Recharge/Content');
+        content.removeAllChildren();
+        content.addChild(node);
     }
 
     onClick() {
         let amount = Number(this.amountInput.string);
-        let min_amount = Number(this.results.data.min_amount);
-        let max_amount = Number(this.results.data.max_amount);
+        let min_amount = Number(this.results.data.min_amount) || 1;
+        let max_amount = Number(this.results.data.max_amount) || 1;
         let game_gold = Number(this.results.data.game_gold);
         let status = this.results.data.is_apply == 0 ? 0 :this.results.data.user_info.status;
         if (status == 1 || status == 2){
             this.showAlert('请等待审核完成！')
         }else if(status == 4){
             this.fetchDownSellGold();
+        }else if(this.results.data.is_password == 0) {
+            this.showAlert('请先设置资金密码！')
         }else if(this.amountInput.string == '') {
             this.showAlert('出售金币数量不能为空！')
         }else if(amount > game_gold ){

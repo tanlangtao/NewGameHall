@@ -19,9 +19,6 @@ export default class NewClass extends cc.Component {
     amountLabel: cc.Label = null;
 
     @property(cc.Label)
-    handling_feeLabel: cc.Label = null;
-
-    @property(cc.Label)
     exchangeLabel: cc.Label = null;
 
     @property(cc.Label)
@@ -43,7 +40,7 @@ export default class NewClass extends cc.Component {
     orderBtn: cc.Node = null;
 
     @property(cc.Prefab)
-    publicOrderAlert: cc.Prefab = null;
+    CompleteDhOrderAlert: cc.Prefab = null;
 
     @property
     public results = {};
@@ -54,17 +51,34 @@ export default class NewClass extends cc.Component {
     }
 
     public init(data){
-        this.typeLabel.string = data.type == 1 ? '支付宝' :(data.type == 2 ? '银行卡提现1' :(data.type == 3 ? '银行卡提现' :"人工提现"));
+        this.typeLabel.string = data.type == 1 ? '支付宝'
+            :(data.type == 2 ? '银行卡'
+                :(data.type == 3 ? '人工兑换'
+                    :(data.type ==4 ? '人工代提'
+                        :(data.type == 5 ? "赠送"
+                            :''))));
         this.amountLabel.string = this.config.toDecimal(data.amount);
-        this.handling_feeLabel.string = `${this.config.toDecimal1(data.handling_fee*100)}%`;
-        this.exchangeLabel.string  = `${this.config.toDecimal1(data.exchange*100)}%`;
-        this.arrival_amountLabel.string  = this.config.toDecimal1(data.arrival_amount);
-        this.statusLabel.string = data.status == 6 ?'已完成':'未成功';
+        // 类型=兑换渠道
+        // 当类型=人工兑换时，费率为玩家填写费率
+        // 当类型=人工代提时，费率为0
+        // 当类型=银行卡、支付宝时，费率=平台费率+渠道费率
+        // 当类型=赠送时，费率均为0
+        if(data.type == 3){
+            this.exchangeLabel.string  = `${this.config.toDecimal1(data.handling_fee*100)}%`;
+        }else if(data.type == 4 || data.type == 5){
+            this.exchangeLabel.string  = '0.0%';
+        }else if(data.type == 1 || data.type == 2) {
+            //平台费率➕渠道费率
+            var sum = Number(data.results.platform_rate) + Number(data.results.channel_rate);
+            this.exchangeLabel.string  = `${this.config.toDecimal1(sum*100)}%`;
+        }
+        this.arrival_amountLabel.string  = this.config.toDecimal(data.arrival_amount);
+        this.statusLabel.string = data.status == 8 ?'已完成':'未成功';
         this.created_atLabel.string = this.config.getTime(data.created_at);
         this.arrival_atLabel.string = data.arrival_at == 0 ? '无' : this.config.getTime(data.arrival_at);
-        this.admin_remarkLabel.string = data.admin_remark;
+        this.admin_remarkLabel.string = data.user_remark ? data.user_remark.substring(0,14) :"" ;
         this.results = data.results;
-        data.status == 6 ? '' : this.orderBtn.removeFromParent();
+        data.status == 7? '' : this.orderBtn.removeFromParent();
     }
 
     start () {
@@ -72,13 +86,11 @@ export default class NewClass extends cc.Component {
     }
 
     onClick(){
-        var node = cc.instantiate(this.publicOrderAlert);
+        var node = cc.instantiate(this.CompleteDhOrderAlert);
         var canvas = cc.find('Canvas');
         canvas.addChild(node);
-        var data = {
-            data : this.results
-        }
-        node.getComponent('PublicOrderAlert').init(data)
+        var data=this.results;
+        node.getComponent('CompleteDhOrderAlert').init(data)
     }
     // update (dt) {}
 }

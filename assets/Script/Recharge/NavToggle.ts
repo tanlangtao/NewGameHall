@@ -44,7 +44,7 @@ export default class NewClass extends cc.Component {
             var node = cc.instantiate(this.Dc);
         }else if(this.label.string == '支付宝'){
             var node = cc.instantiate(this.Zfb);
-        }else if(this.label.string == '支付宝转银行卡'){
+        }else if(this.label.string == '银行卡转账'){
             var node = cc.instantiate(this.ZfbToBank);
         }
         content.removeAllChildren();

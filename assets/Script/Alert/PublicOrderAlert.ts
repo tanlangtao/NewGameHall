@@ -30,15 +30,21 @@ export default class NewClass extends cc.Component {
     @property(cc.Label)
     nickNameLabel: cc.Label = null;
 
+    @property(cc.Label)
+    remarkLabel : cc.Label = null;
+
     @property(cc.Prefab)
     publicAlert : cc.Prefab = null;
+
+    @property(cc.Node)
+    fuzhiBtn4 : cc.Node = null;
 
     @property
     public results = {};
     public token = null;
     public config = null;
     public UrlData : any = [];
-
+    app : any= {};
     public init(data){
         this.results =data;
         this.amountLabel.string = this.config.toDecimal(data.data.amount);
@@ -46,6 +52,10 @@ export default class NewClass extends cc.Component {
         this.card_nameLabel.string = data.data.card_name;
         this.card_numLabel.string = data.data.card_num;
         this.nickNameLabel.string = decodeURI(this.UrlData.user_name);
+        this.remarkLabel.string = data.data.remark;
+        if(this.remarkLabel.string == ''){
+            this.fuzhiBtn4.removeFromParent();
+        }
     }
     // LIFE-CYCLE CALLBACKS:
 
@@ -56,26 +66,32 @@ export default class NewClass extends cc.Component {
     }
 
     start () {
-
+        this.app = cc.find('Canvas/Main').getComponent('Main');
     }
 
     copyCard_num(){
         this.config.copyToClipBoard(this.card_numLabel.string);
-        this.showAlert(`复制成功！${this.card_numLabel.string}`);
+        // this.app.Client.send('__clipboard', { text: this.card_numLabel.string })
     }
 
     copyCard_name(){
         this.config.copyToClipBoard(this.card_nameLabel.string);
-        this.showAlert(`复制成功！${this.card_nameLabel.string}`);
+        // this.app.Client.send('__clipboard', { text: this.card_nameLabel.string })
+
     }
 
     copyAmount(){
         this.config.copyToClipBoard(this.amountLabel.string);
-        this.showAlert(`复制成功！${this.amountLabel.string}`);
+        // this.app.Client.send('__clipboard', { text: this.amountLabel.string })
+    }
+
+    copyRemark(){
+        this.config.copyToClipBoard(this.remarkLabel.string);
+        // this.app.Client.send('__clipboard', { text: this.remarkLabel.string })
     }
 
     removeSelf(){
-        this.node.removeFromParent()
+        this.node.destroy()
     }
 
     onClick(){

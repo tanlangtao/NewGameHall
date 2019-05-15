@@ -26,12 +26,12 @@ export default class NewClass extends cc.Component {
     onLoad () {
         var self = this;
         this.timer = setTimeout(() => {
-            self.node.removeFromParent()
+            this.node.destroy()
         }, 1500)
     }
 
     removeSelf(){
-        this.node.removeFromParent()
+        this.node.destroy()
     }
 
     onDestroy(){

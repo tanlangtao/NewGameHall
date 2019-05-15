@@ -835,7 +835,7 @@
     "_enabled": true,
     "alignMode": 1,
     "_target": null,
-    "_alignFlags": 17,
+    "_alignFlags": 41,
     "_left": 0,
     "_right": 0,
     "_top": 0,
@@ -848,7 +848,7 @@
     "_isAbsBottom": true,
     "_isAbsHorizontalCenter": true,
     "_isAbsVerticalCenter": true,
-    "_originalWidth": 0,
+    "_originalWidth": 1136,
     "_originalHeight": 0,
     "_id": ""
   },
@@ -4496,6 +4496,9 @@
     "RecoveryGold": {
       "__uuid__": "c1eff934-7a77-44f9-8c25-caa3f5eec5b2"
     },
+    "service": {
+      "__uuid__": "315c4863-313d-4c04-9ea5-b6abf20b1121"
+    },
     "amountLabel": {
       "__id__": 39
     },
@@ -4668,8 +4671,8 @@
     },
     "_enabled": true,
     "_useOriginalSize": false,
-    "_string": "1.1",
-    "_N$string": "1.1",
+    "_string": "2.9",
+    "_N$string": "2.9",
     "_fontSize": 20,
     "_lineHeight": 20,
     "_enableWrapText": true,

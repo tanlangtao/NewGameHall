@@ -56,19 +56,13 @@ export default class NewClass extends cc.Component {
             this.node.removeFromParent();
         }
     }
-
+    // 绑定资金密码
     fetchBindAccountPay(){
-        var url = `${this.UrlData.host}/api/with_draw/bindAccountPassword`;
+        var url = `${this.UrlData.host}/api/user_funds_password/bindPassword`;
         this.FormData= new FormData();
         this.FormData.append('user_id',this.UrlData.user_id)
-        this.FormData.append('user_name',decodeURI(this.UrlData.user_name))
-        this.FormData.append('action_type','1')
-        this.FormData.append('pay_password',this.passwordInput.string)
-        this.FormData.append('client',this.UrlData.client)
-        this.FormData.append('proxy_user_id',this.UrlData.proxy_user_id)
-        this.FormData.append('proxy_name',decodeURI(this.UrlData.proxy_name))
-        this.FormData.append('package_id',this.UrlData.package_id)
-        this.FormData.append('token',this.token)
+        this.FormData.append('password',this.passwordInput.string);
+        this.FormData.append('token',this.token);
         fetch(url,{
             method:'POST',
             body:this.FormData
@@ -112,7 +106,7 @@ export default class NewClass extends cc.Component {
     }
     
     removeSelf(){
-        this.node.removeFromParent();
+        this.node.destroy();
     }
     // update (dt) {}
 }

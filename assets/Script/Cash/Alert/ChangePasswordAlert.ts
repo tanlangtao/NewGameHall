@@ -68,19 +68,12 @@ export default class NewClass extends cc.Component {
     }
 
     fetchBindAccountPay(){
-        var url = `${this.UrlData.host}/api/with_draw/bindAccountPassword`;
+        var url = `${this.UrlData.host}/api/user_funds_password/updatePassword`;
         this.FormData= new FormData();
         this.FormData.append('user_id',this.UrlData.user_id)
-        this.FormData.append('user_name',decodeURI(this.UrlData.user_name))
-        this.FormData.append('action_type','2')
         this.FormData.append('old_password',this.oldPasswordInput.string)
-        this.FormData.append('new_password',this.newPasswordInput.string)
-        this.FormData.append('repeat_password',this.repeatPasswordInput.string)
-        this.FormData.append('client',this.UrlData.client)
-        this.FormData.append('proxy_user_id',this.UrlData.proxy_user_id)
-        this.FormData.append('proxy_name',decodeURI(this.UrlData.proxy_name))
-        this.FormData.append('package_id',this.UrlData.package_id)
-        this.FormData.append('token',this.token)
+        this.FormData.append('password',this.newPasswordInput.string)
+        this.FormData.append('token',this.token);
         fetch(url,{
             method:'POST',
             body:this.FormData
@@ -132,7 +125,7 @@ export default class NewClass extends cc.Component {
     }
     
     removeSelf(){
-        this.node.removeFromParent();
+        this.node.destroy();
     }
     // update (dt) {}
 }

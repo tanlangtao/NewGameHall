@@ -22,6 +22,15 @@ export default class NewClass extends cc.Component {
     @property(cc.Prefab)
     PublicOrderAlert : cc.Prefab = null;
 
+    @property(cc.Label)
+    selectLabel: cc.Label = null;
+
+    @property(cc.Prefab)
+    SelectItem: cc.Prefab =null;
+
+    @property(cc.Node)
+    selectContent: cc.Node =null;
+
     @property(cc.EditBox)
     amountInput : cc.EditBox = null;
 
@@ -51,14 +60,16 @@ export default class NewClass extends cc.Component {
     public UrlData : any = [];
     public token : string = '';
     public results : any = {};
+    public  showSelect = false;
+    public current : any = {};
+    public config  = null;
     FormData  = new FormData();
     // LIFE-CYCLE CALLBACKS:
-
     onLoad () {
-        var config = new Config();
-        this.UrlData =config.getUrlData();
-        this.token = config.token;
-        //请求支付宝
+        this.config = new Config();
+        this.UrlData =this.config.getUrlData();
+        this.token = this.config.token;
+        //请求首页
         this.fetchZfb()
 
         this.getPublicInput()
@@ -68,12 +79,13 @@ export default class NewClass extends cc.Component {
 
     }
     public fetchZfb(){
-        var url = `${this.UrlData.host}/api/payment/guduPayPaymentIndex&token=${this.token}`;
+        var url = `${this.UrlData.host}/api/payment/aliPayPaymentIndex?user_id=${this.UrlData.user_id}&token=${this.token}`;
         fetch(url,{
             method:'get'
         }).then((data)=>data.json()).then((data)=>{
             if(data.status == 0){
-                this.results = data.data;
+                this.results = data.data.bankcard_transfer;
+                this.current = this.results[0];
                 this.initRender();
             }else{
                 this.showAlert(data.msg)
@@ -82,8 +94,9 @@ export default class NewClass extends cc.Component {
     }
 
     public initRender(){
-        var span_amount = this.results.gudu_random_amount;
-        this.czArea.string = `充值范围:(${this.results.gudu_pay_min_amount}-${this.results.gudu_pay_max_amount})`
+        this.selectLabel.string = this.current.name;
+        var span_amount = this.current.span_amount.split(',');
+        this.czArea.string = `充值范围:(${this.current.min_amount}-${this.current.max_amount})`;
         this.gold1.string = span_amount[0];
         this.gold2.string = span_amount[1];
         this.gold3.string = span_amount[2];
@@ -125,29 +138,31 @@ export default class NewClass extends cc.Component {
     //确认充值按钮回调
     public onClick(){
         var amount = Number(this.amountInput.string);
-        var min_amount = Number(this.results.gudu_pay_min_amount);
-        var max_amount = Number(this.results.gudu_pay_max_amount);
+        var min_amount = Number(this.current.min_amount);
+        var max_amount = Number(this.current.max_amount);
         if(this.amountInput.string ==''){
             this.showAlert('充值金额不能为空!')
         }else if(amount < min_amount || amount > max_amount){
             this.showAlert('不符合充值范围！')
         }else{
-            this.fetchOrder()
+            this.fetchOrder();
         }
     }
 
     fetchOrder(){
-        var url = `${this.UrlData.host}/api/payment/transferpayment`;
+        var url = `${this.UrlData.host}/api/payment/bankCardTransfer`;
         this.FormData = new FormData();
-        this.FormData.append('user_id',this.UrlData.user_id)
-        this.FormData.append('user_name',decodeURI(this.UrlData.user_name))
-        this.FormData.append('amount',this.amountInput.string)
-        this.FormData.append('client',this.UrlData.client)
-        this.FormData.append('proxy_user_id',this.UrlData.proxy_user_id)
-        this.FormData.append('proxy_name',decodeURI(this.UrlData.proxy_name))
-        this.FormData.append('package_id',this.UrlData.package_id)
-        this.FormData.append('order_type','1')
-        this.FormData.append('token',this.token)
+        this.FormData.append('user_id',this.UrlData.user_id);
+        this.FormData.append('user_name',decodeURI(this.UrlData.user_name));
+        this.FormData.append('amount',this.amountInput.string);
+        this.FormData.append('channel_id',this.current.channel_id);
+        this.FormData.append('pay_type',this.current.pay_type);
+        this.FormData.append('client',this.UrlData.client);
+        this.FormData.append('proxy_user_id',this.UrlData.proxy_user_id);
+        this.FormData.append('proxy_name',decodeURI(this.UrlData.proxy_name));
+        this.FormData.append('package_id',this.UrlData.package_id);
+        this.FormData.append('order_type','1');
+        this.FormData.append('token',this.token);
         fetch(url,{
             method:'POST',
             body:this.FormData
@@ -167,6 +182,24 @@ export default class NewClass extends cc.Component {
         var string = e.currentTarget.children[1].getComponent(cc.Label).string;
         var sum = Number(this.amountInput.string)+Number(string)
         this.amountInput.string = `${sum}`;
+    }
+
+    selectClick(){
+        if(!this.showSelect){
+            for( var i = 0 ; i < this.results.length ; i++){
+                var node = cc.instantiate(this.SelectItem);
+                this.selectContent.addChild(node);
+                node.getComponent('SelectItem').init({
+                    text:this.results[i].name,
+                    parentComponent:this,
+                    index:i
+                })
+            }
+            this.showSelect = true;
+        }else{
+            this.selectContent.removeAllChildren();
+            this.showSelect = false;
+        }
     }
     // update (dt) {}
 }

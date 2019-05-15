@@ -52,7 +52,7 @@ export default class NewClass extends cc.Component {
         if(this.passwordInput.string == '' ){
             this.showAlert('密码不能为空!')
         }else if(this.passwordInput.string.length < 6 || this.passwordInput.string.length > 10){
-            this.showAlert('请设置6-10位新密码！')
+            this.showAlert('密码错误！')
         }else{
             this.node.removeFromParent();
             this.fetchcheckPassword();
@@ -60,7 +60,7 @@ export default class NewClass extends cc.Component {
     }
 
     fetchcheckPassword(){
-        var url = `${this.UrlData.host}/api/with_draw/checkPassword?user_id=${this.UrlData.user_id}&pay_password=${this.passwordInput.string}&token=${this.token}`;
+        var url = `${this.UrlData.host}/api/user_funds_password/checkPassword?user_id=${this.UrlData.user_id}&password=${this.passwordInput.string}&token=${this.token}`;
         fetch(url,{
             method:'GET',
         }).then((data)=>data.json()).then((data)=>{
@@ -69,6 +69,8 @@ export default class NewClass extends cc.Component {
                 // type =2 , 确认兑换
                 // type =3 , 申请人工兑换
                 // type =4 , 确认出售金币
+                // type =5 , 确认回收金币
+                // type =6 , 确认赠送
                 if(this.type == 1){
                     var self = this;
                     var timer = setTimeout(()=>{
@@ -76,12 +78,17 @@ export default class NewClass extends cc.Component {
                         clearTimeout(timer);
                     },500)
                 }else if(this.type == 2){
-                    this.parentComponent.fetchwithDrawApply(this.passwordInput.string);
+                    this.parentComponent.fetchwithDrawApply();
                 }else if(this.type == 3){
                     this.parentComponent.fetchRgDh();
                 }else if(this.type == 4){
                     this.parentComponent.fetchSell_gold();
+                }else if(this.type == 5){
+                    this.parentComponent.fetchsubmitRecycleGoldInfo();
+                }else if(this.type == 6){
+                    this.parentComponent.fetchGive();
                 }
+
             }else{
                 this.parentComponent.showAlert(data.msg)
             }
@@ -118,7 +125,7 @@ export default class NewClass extends cc.Component {
     }
     
     removeSelf(){
-        this.node.removeFromParent();
+        this.node.destroy();
     }
     // update (dt) {}
 }

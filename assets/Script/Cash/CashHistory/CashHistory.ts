@@ -22,6 +22,9 @@ export default class NewClass extends cc.Component {
     @property(cc.Prefab)
     ListItem : cc.Prefab = null;
 
+    @property(cc.Prefab)
+    publicAlert : cc.Prefab = null;
+
     @property(cc.Node)
     List : cc.Node = null;
 
@@ -43,23 +46,19 @@ export default class NewClass extends cc.Component {
 
         this.addNavToggle()
 
-        this.updataList()
+        this.fetchIndex();
     }
 
     start () {
 
     }
 
-    updataList(){
-        this.List.removeAllChildren();
-        this.fetchIndex();
-    }
-
     public fetchIndex(){
-        var url = `${this.UrlData.host}/api/order/withDrawOrderList?user_id=${this.UrlData.user_id}&token=${this.token}&order_status=${this.order_status}&page=${this.page}&page_set=8`;
+        var url = `${this.UrlData.host}/api/with_draw/withDrawHistory?user_id=${this.UrlData.user_id}&token=${this.token}&order_status=${this.order_status}&page=${this.page}&page_set=8`;
         fetch(url,{
             method:'get'
         }).then((data)=>data.json()).then((data)=>{
+            this.List.removeAllChildren();
             if(data.status == 0){
                 this.results = data;
                 this.pageLabel.string = `${this.page} / ${data.data.total_page == 0 ? '1' : data.data.total_page}`
@@ -72,23 +71,31 @@ export default class NewClass extends cc.Component {
                         type : data.type,
                         amount : data.amount,
                         handling_fee:data.handling_fee,
-                        exchange:data.exchange,
+                        replace_handling_fee:data.replace_handling_fee,
                         arrival_amount:data.arrival_amount,
                         status : data.status,
                         created_at : data.created_at,
                         arrival_at : data.arrival_at,
-                        admin_remark:data.admin_remark,
+                        user_remark:data.user_remark,
                         results:data
                     })
                 }
+
             }else{
-                
+                this.showAlert(data.msg)
             }
         })
     }
 
+    public showAlert(data) {
+        var node = cc.instantiate(this.publicAlert);
+        var canvas = cc.find('Canvas');
+        canvas.addChild(node);
+        node.getComponent('PublicAlert').init(data);
+    }
+
     public addNavToggle(){
-        var arr = ['全部','已成功','未成功'];
+        var arr = ['全部','未完成','已完成'];
         for(let i:number = 0; i< arr.length; i++){
             var node = cc.instantiate(this.NavToggle);
             this.ToggleContainer.addChild(node);
@@ -101,21 +108,22 @@ export default class NewClass extends cc.Component {
     }
 
     removeSelf(){
-        this.node.removeFromParent();
+        this.node.destroy();
     }
 
     pageUp(){
         if(this.page > 1){
             this.page = this.page - 1
-            this.updataList()
+            this.fetchIndex();
         }
     }
 
     pageDown(){
         if(this.page < this.results.data.total_page ){
             this.page = this.page + 1
-            this.updataList()
+            this.fetchIndex();
         }
+
     }
     // update (dt) {}
 }
