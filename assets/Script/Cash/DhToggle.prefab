@@ -494,12 +494,8 @@
     "BankDh": {
       "__uuid__": "d4d36617-7405-4fed-a3f1-e797c843a28c"
     },
-    "RgDh": {
-      "__uuid__": "61238624-0cc8-4702-b51c-c1581808d052"
-    },
-    "Give": {
-      "__uuid__": "80ff83f5-04de-4d7e-bdf3-60c32e45ae2b"
-    },
+    "RgDh": null,
+    "Give": null,
     "_id": ""
   },
   {

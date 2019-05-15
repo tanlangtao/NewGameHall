@@ -58,6 +58,13 @@ export default class NewClass extends cc.Component {
 
     @property(cc.Node)
     selectContent :cc.Node = null;
+
+    @property(cc.Node)
+    selectBankContent: cc.Node = null;
+
+    @property(cc.Prefab)
+    sellSelectItem : cc.Prefab = null;
+
     @property
     public config  = null;
     public UrlData : any = [];
@@ -70,9 +77,15 @@ export default class NewClass extends cc.Component {
         channel_type: "2",
         max_amount: "40000",
         min_amount: "1"};
-    // LIFE-CYCLE CALLBACKS:
-
+    //当前选择的银行卡信息
+    public Info = null;
+    public bankData = [];
+    public showBankSelect = false;
+    public bankId = null;
+    public action = 'add';
+    app = null;
     onLoad () {
+        this.app = cc.find('Canvas/Main').getComponent('Main');
         this.config = new Config();
         this.UrlData = this.config.getUrlData();
         this.token = this.config.token;
@@ -99,14 +112,51 @@ export default class NewClass extends cc.Component {
     }
     
     init(){
+        this.bankData = [] ;
         var data = this.data.data;
+        for(let i = 0 ;i < data.list.length ;i++){
+            let data = this.data.data.list[i];
+            if (data.type == 3){
+                this.bankData.push(data)
+            }
+        }
+        if(this.bankData.length>0){
+            this.Info =JSON.parse(this.bankData[0].info)
+            this.bankId = this.bankData[0].id;
+        }
+        this.action = this.bankData.length != 0 ? 'edit' :'add'
         this.results = this.data.data.withDraw_info.bankcard.channel;
         this.amountLabel.string = this.config.toDecimal(data.game_gold);
         this.czArea.string = `兑换范围:(${this.current.min_amount} - ${this.current.max_amount})`;
-        this.accountLabel.string = data.bank_num != "" ? this.config.testBankNum(data.bank_num) :'未绑定';
+        this.accountLabel.string = this.bankData.length != 0 ? this.config.testBankNum(this.Info.card_num) :'未设置';
         this.passworldLabel.string = data.is_password == 1 ? '已设置' : '未设置';
-        this.btn1.string = data.bank_num != "" ? '去修改' : '去绑定';
+        this.btn1.string = this.bankData.length != 0  ? '去修改' : '未设置';
         this.btn2.string = data.is_password == 1 ? '去修改' : '去设置';
+    }
+    selectBankClick(){
+        if(this.bankData.length == 0) {
+            this.app.showAlert('未设置银行卡');
+            return;
+        }
+        this.selectContent.removeAllChildren();
+        if(!this.showBankSelect ){
+            for( var i = 0 ; i < this.bankData.length ; i++){
+                var node = cc.instantiate(this.sellSelectItem);
+                this.selectBankContent.addChild(node);
+                node.getComponent('SellSelectItem').init({
+                    text:JSON.parse(this.bankData[i].info).card_num,
+                    Label:this.accountLabel,
+                    showSelect:this.showBankSelect,
+                    selectContent:this.selectBankContent,
+                    data:this.bankData[i],
+                    parentCom:this
+                })
+            }
+            this.showBankSelect = true;
+        }else{
+            this.selectBankContent.removeAllChildren();
+            this.showBankSelect = false;
+        }
     }
 
     //selectItem回调
@@ -157,13 +207,14 @@ export default class NewClass extends cc.Component {
     }
     //验证密码回调type=1
     showAccountAlert(){
-        var node = cc.instantiate(this.BankAccountAlert);
-        var canvas = cc.find('Canvas');
-        canvas.addChild(node);
-        node.getComponent('BankAccountAlert').init({
-            text:this.data.data.bank_num !='' ?'修改银行卡' : '绑定银行卡',
-            parentComponent:this
-        })
+        this.app.showBankAccountAlert({
+            text:this.bankData.length != 0  ?'修改银行卡' : '设置银行卡',
+            action:this.action,
+            itemId:this.bankId,
+            parentComponent:this,
+            //修改界面初始数据
+            changeData:this.Info
+        });
     }
     //验证密码回调type=2
     public fetchwithDrawApply(){
@@ -171,6 +222,7 @@ export default class NewClass extends cc.Component {
         this.FormData= new FormData();
         this.FormData.append('user_id',this.UrlData.user_id)
         this.FormData.append('user_name',decodeURI(this.UrlData.user_name))
+        this.FormData.append('account_id',this.bankId);
         this.FormData.append('amount',this.amountInput.string)
         this.FormData.append('order_type',this.current.channel_type);
         this.FormData.append('withdraw_type',`2`);

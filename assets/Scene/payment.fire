@@ -343,6 +343,12 @@
     "Cash": {
       "__uuid__": "782c655f-681c-483a-8cb3-b7f9c4260b47"
     },
+    "AlipayAccountAlert": {
+      "__uuid__": "45dfb6b4-a56e-41b9-9d5b-be0248d0aeb6"
+    },
+    "BankAccountAlert": {
+      "__uuid__": "6c7b42fa-1e5a-4f92-9d02-7338e2589514"
+    },
     "UrlData": [],
     "_id": "9dqWwSOcdFead1BTXSgCpa"
   },

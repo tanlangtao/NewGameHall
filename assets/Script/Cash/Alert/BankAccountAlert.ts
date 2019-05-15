@@ -45,27 +45,32 @@ export default class NewClass extends cc.Component {
     public UrlData: any = [];
     public token: string = '';
     FormData = new FormData();
-    parentComponent = null;
     showSelect = false;
+    action = 'add';
+    itemId = null;
+    app = null;
 
     public init(data) {
         var config = new Config();
         this.UrlData = config.getUrlData();
         this.token = config.token;
         this.label.string = data.text;
-        this.parentComponent = data.parentComponent;
+        this.action = data.action;
+        this.itemId = data.itemId;
     }
 
-    // LIFE-CYCLE CALLBACKS:
+    changeContent(data){
+        this.accountInput.string = data.card_num;
+        this.nameInput.string = data.card_name;
+        this.selectLabel.string = data.bank_name;
+        this.bankNameInput.string = data.branch_name;
+    }
 
     onLoad() {
+        this.app = cc.find('Canvas/Main').getComponent('Main');
         this.getPublicInput();
         this.getPublicInput2(this.nameInput);
         this.getPublicInput2(this.bankNameInput);
-    }
-
-    start() {
-
     }
 
     onClick() {
@@ -83,29 +88,39 @@ export default class NewClass extends cc.Component {
     }
 
     fetchBindAccountPay() {
-        var url = `${this.UrlData.host}/api/with_draw/bindAccountPay`;
-        this.FormData = new FormData();
-        this.FormData.append('user_id', this.UrlData.user_id);
-        this.FormData.append('user_name', decodeURI(this.UrlData.user_name));
-        this.FormData.append('withdraw_type', '2');
-        this.FormData.append('bank_num', this.accountInput.string);
-        this.FormData.append('card_name', this.nameInput.string);
-        this.FormData.append('bank_name', this.selectLabel.string);
-        this.FormData.append('branch_name', this.bankNameInput.string);
+        var url = `${this.UrlData.host}/api/payment_account/saveAccount`;
+        let obj = {
+            card_num:this.accountInput.string,
+            card_name:this.nameInput.string,
+            bank_name:this.selectLabel.string,
+            branch_name:this.bankNameInput.string,
+        };
+        let info = JSON.stringify(obj);
+        this.FormData= new FormData();
+        this.FormData.append('user_id',this.UrlData.user_id);
+        this.FormData.append('user_name',decodeURI(this.UrlData.user_name));
+        this.FormData.append('action',this.action);
+        this.FormData.append('type','3');
+        this.FormData.append('info',info);
         this.FormData.append('client', this.UrlData.client);
         this.FormData.append('proxy_user_id', this.UrlData.proxy_user_id);
         this.FormData.append('proxy_name', decodeURI(this.UrlData.proxy_name));
         this.FormData.append('package_id', this.UrlData.package_id);
-        this.FormData.append('token', this.token);
-        fetch(url, {
-            method: 'POST',
-            body: this.FormData
-        }).then((data) => data.json()).then((data) => {
-            if (data.status == 0) {
-                this.parentComponent.fetchIndex();
-                this.parentComponent.showAlert('操作成功！')
-            } else {
-                this.parentComponent.showAlert(data.msg)
+        this.FormData.append('token',this.token);
+        if(this.action == 'edit'){
+            this.FormData.append('id',this.itemId);
+        }
+
+        fetch(url,{
+            method:'POST',
+            body:this.FormData
+        }).then((data)=>data.json()).then((data)=>{
+            if(data.status == 0){
+                let bankCom = cc.find('Canvas/Cash/Content/BankDh').getComponent('BankDh');
+                bankCom.fetchIndex();
+                this.app.showAlert('操作成功!')
+            }else{
+                this.app.showAlert(data.msg)
             }
         })
     }

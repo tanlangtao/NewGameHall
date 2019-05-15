@@ -70,6 +70,7 @@ export default class NewClass extends cc.Component {
                 this.app.showAlert(data.msg)
             }
         }).catch((error)=>{
+            console.log(error)
             if(this.idx>=5){
                 this.app.showAlert(' 网络错误，请重试！');
                 let self = this;
@@ -91,17 +92,11 @@ export default class NewClass extends cc.Component {
     public addNavToggle(){
         var arr = [];
         if(!this.results.data.withDraw_info) return;
-        if(this.results.data.withDraw_info.replace_withdraw.is_close == 0){
-            arr.push('人工兑换')
-        }
         if(this.results.data.withDraw_info.bankcard.is_close == 0){
             arr.push('支付宝兑换')
         }
         if(this.results.data.withDraw_info.alipay.is_close == 0){
             arr.push('银行卡兑换')
-        }
-        if(this.results.data.withDraw_info.given.is_close == 0){
-            arr.push('赠送')
         }
         for(let i:number = 0; i< arr.length; i++){
             var node = cc.instantiate(this.NavToggle);

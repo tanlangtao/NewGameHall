@@ -28,24 +28,44 @@ export default class NewClass extends cc.Component {
     @property(cc.EditBox)
     accountInput: cc.EditBox = null;
 
+    @property(cc.EditBox)
+    firstNameInput: cc.EditBox = null;
+
+    @property(cc.EditBox)
+    lastNameInput: cc.EditBox = null;
+
+
     @property()
     public UrlData : any = [];
     public token : string = '';
     FormData = new FormData();
-    parentComponent  = null;
+    showSelect = false;
+    action = 'add';
+    itemId = null;
+    app = null;
 
     public init(data){
         var config = new Config();
         this.UrlData = config.getUrlData();
         this.token = config.token;
         this.label.string = data.text;
-        this.parentComponent = data.parentComponent;
+        this.action = data.action;
+        this.itemId = data.itemId;
     }
-    // LIFE-CYCLE CALLBACKS:
+
+    changeContent(data){
+        this.accountInput.string = data.account_card;
+        this.nameInput.string = data.account_name;
+        this.firstNameInput.string = data.account_surname;
+        this.lastNameInput.string = data.account_first_name;
+    }
 
     onLoad () {
+        this.app = cc.find('Canvas/Main').getComponent('Main');
         this.getPublicInput();
-        this.getPublicInput2();
+        this.getPublicInput2(this.nameInput);
+        this.getPublicInput2(this.firstNameInput);
+        this.getPublicInput2(this.lastNameInput);
     }
 
     start () {
@@ -63,27 +83,41 @@ export default class NewClass extends cc.Component {
     }
 
     fetchBindAccountPay(){
-        var url = `${this.UrlData.host}/api/with_draw/bindAccountPay`;
+        let url = `${this.UrlData.host}/api/payment_account/saveAccount`;
+        let obj = {
+            account_card:this.accountInput.string,
+            account_surname:this.firstNameInput.string,
+            account_first_name:this.lastNameInput.string,
+            account_name:this.nameInput.string,
+
+            pay_url:'',
+        };
+        let info = JSON.stringify(obj);
         this.FormData= new FormData();
-        this.FormData.append('user_id',this.UrlData.user_id)
-        this.FormData.append('user_name',decodeURI(this.UrlData.user_name))
-        this.FormData.append('withdraw_type','1')
-        this.FormData.append('alipay_account',this.accountInput.string)
-        this.FormData.append('alipay_name',this.nameInput.string)
-        this.FormData.append('client',this.UrlData.client)
-        this.FormData.append('proxy_user_id',this.UrlData.proxy_user_id)
-        this.FormData.append('proxy_name',decodeURI(this.UrlData.proxy_name))
-        this.FormData.append('package_id',this.UrlData.package_id)
-        this.FormData.append('token',this.token)
+        this.FormData.append('user_id',this.UrlData.user_id);
+        this.FormData.append('user_name',decodeURI(this.UrlData.user_name));
+        this.FormData.append('action',this.action);
+        this.FormData.append('withdraw_type','1');
+        this.FormData.append('type','2');
+        this.FormData.append('info',info);
+        this.FormData.append('client', this.UrlData.client)
+        this.FormData.append('proxy_user_id', this.UrlData.proxy_user_id)
+        this.FormData.append('proxy_name', decodeURI(this.UrlData.proxy_name))
+        this.FormData.append('package_id', this.UrlData.package_id)
+        this.FormData.append('token',this.token);
+        if(this.action == 'edit'){
+            this.FormData.append('id',this.itemId);
+        }
         fetch(url,{
             method:'POST',
             body:this.FormData
         }).then((data)=>data.json()).then((data)=>{
             if(data.status == 0){
-                this.parentComponent.fetchIndex();
-                this.parentComponent.showAlert('操作成功！')
+                let zfbCom = cc.find('Canvas/Cash/Content/Dh').getComponent('Dh');
+                zfbCom.fetchIndex();
+                this.app.showAlert('操作成功!')
             }else{
-                this.parentComponent.showAlert(data.msg)
+                this.app.showAlert(data.msg)
             }
         })
     }
@@ -115,26 +149,35 @@ export default class NewClass extends cc.Component {
         })
     }
 
-    public getPublicInput2(){
+    public getPublicInput2(Input){
         var PublicInputAlert = cc.instantiate(this.PublicInputAlert);
         var canvas = cc.find('Canvas');
-        this.nameInput.node.on('editing-did-began',(e)=>{
+        Input.node.on('editing-did-began',(e)=>{
             canvas.addChild(PublicInputAlert);
             PublicInputAlert.getComponent('PublicInputAlert').init({
                 text:e.string,
-                input:this.nameInput
+                input:Input
             })
         })
-        this.nameInput.node.on('text-changed',(e)=>{
+        Input.node.on('text-changed',(e)=>{
             //验证input 不能输入特殊字符
             var patrn = /[`~!@#$%^&*()_\-+=<>?:"{}|,.\/;'\\[\]·~！@#￥%……&*（）——\-+={}|《》？：“”【】、；‘’，。、]/im;
-            this.nameInput.string = e.string.replace(patrn,'');
+            Input.string = e.string.replace(patrn,'');
             PublicInputAlert.getComponent('PublicInputAlert').init({
                 text:e.string,
-                input:this.nameInput
+                input:Input
             })
         })
     }
+
+    deleteFirstName(){
+        this.firstNameInput.string = '';
+    }
+
+    deleteLastName(){
+        this.lastNameInput.string = '';
+    }
+
 
     deleteName(){
         this.nameInput.string = '';

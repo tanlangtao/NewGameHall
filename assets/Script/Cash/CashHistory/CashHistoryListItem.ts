@@ -53,10 +53,9 @@ export default class NewClass extends cc.Component {
     public init(data){
         this.typeLabel.string = data.type == 1 ? '支付宝'
             :(data.type == 2 ? '银行卡'
-                :(data.type == 3 ? '人工兑换'
-                    :(data.type ==4 ? '人工代提'
+                    :(data.type ==4 ? '交易所'
                         :(data.type == 5 ? "赠送"
-                            :''))));
+                            :'')));
         this.amountLabel.string = this.config.toDecimal(data.amount);
         // 类型=兑换渠道
         // 当类型=人工兑换时，费率为玩家填写费率

@@ -24,6 +24,12 @@ export default class NewClass extends cc.Component {
     @property(cc.Prefab)
     Cash: cc.Prefab = null;
 
+    @property(cc.Prefab)
+    AlipayAccountAlert: cc.Prefab = null;
+
+    @property(cc.Prefab)
+    BankAccountAlert: cc.Prefab = null;
+
     @property()
     public UrlData : any = [];
     public Client  = null;
@@ -51,5 +57,36 @@ export default class NewClass extends cc.Component {
         var canvas = cc.find('Canvas');
         canvas.addChild(node);
         node.getComponent('PublicAlert').init(data)
+    }
+    // 添加支付宝账号弹窗
+    public showAlipayAccountAlert(data){
+        var canvas = cc.find('Canvas');
+        var node = cc.instantiate(this.AlipayAccountAlert);
+        canvas.addChild(node);
+        let AlipayAccountAlert = node.getComponent('AlipayAccountAlert');
+        AlipayAccountAlert.init({
+            text:data.text,
+            action:data.action,
+            itemId:data.itemId
+        });
+        if(data.changeData){
+            AlipayAccountAlert.changeContent(data.changeData);
+        }
+
+    }
+    // 添加银行卡类型弹窗
+    public showBankAccountAlert(data){
+        var canvas = cc.find('Canvas');
+        var node = cc.instantiate(this.BankAccountAlert);
+        canvas.addChild(node);
+        let BankAccountAlert = node.getComponent('BankAccountAlert');
+        BankAccountAlert.init({
+            text:data.text,
+            action:data.action,
+            itemId:data.itemId
+        })
+        if(data.changeData){
+            BankAccountAlert.changeContent(data.changeData);
+        }
     }
 }

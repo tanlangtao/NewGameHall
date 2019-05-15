@@ -96,13 +96,13 @@ export default class NewClass extends cc.Component {
     public addNavToggle() {
         var arr = [];
         if (this.zfbResults.data.alipay.length == 0 && this.zfbResults.data.bankcard_transfer.length == 0) {
-            arr = ['人工代充值']
+            arr= []
         } else if (this.zfbResults.data.alipay.length == 0) {
-            arr = ['人工代充值', '银行卡转账']
+            arr= ['转账到银行卡']
         } else if (this.zfbResults.data.bankcard_transfer.length == 0) {
-            arr = ['人工代充值', '支付宝']
+            arr= ['支付宝']
         } else {
-            arr = ['人工代充值', '支付宝', '银行卡转账']
+            arr= ['支付宝', '转账到银行卡']
         }
         for (let i: number = 0; i < arr.length; i++) {
             var node = cc.instantiate(this.NavToggle);

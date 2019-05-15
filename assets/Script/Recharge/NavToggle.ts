@@ -40,12 +40,18 @@ export default class NewClass extends cc.Component {
 
     onClick(){
         var content = cc.find('Canvas/Recharge/Content');
-        if(this.label.string == '人工代充值'){
-            var node = cc.instantiate(this.Dc);
-        }else if(this.label.string == '支付宝'){
+        if(this.label.string == '支付宝'){
             var node = cc.instantiate(this.Zfb);
-        }else if(this.label.string == '银行卡转账'){
+        }else if(this.label.string == '转账到银行卡') {
             var node = cc.instantiate(this.ZfbToBank);
+        }else if(this.label.string == '微信'){
+
+        }else if(this.label.string == '快捷支付'){
+
+        }else if(this.label.string == '网银转账'){
+
+        }else if(this.label.string == '银联扫码'){
+
         }
         content.removeAllChildren();
         content.addChild(node);
